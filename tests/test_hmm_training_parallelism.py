@@ -30,6 +30,7 @@ def test_parallel_training_configuration_and_usage():
     final_fit = cell_source("shared-final-fit")
     assert "K_VALUES = tuple(range(4, 18))" in config
     assert "N_JOBS = 20" in config
+    assert "TARGET_LABEL_LENGTHS =" in config
     assert "candidate_fits = fit_best_hmms(" in selection
     assert "K_VALUES, train_values, train_lengths" in selection
     assert "final_model, final_train_ll = fit_best_hmms(" in final_fit
@@ -94,3 +95,21 @@ def test_parallel_helper_keeps_best_restart_and_caps_workers():
         "inner_max_num_threads": 1,
         "verbose": 10,
     }
+
+
+def test_target_split_trims_unlabeled_tail_per_segment():
+    namespace = {
+        "np": np,
+        "SUBJECTS": ("sub-01",),
+        "target_keys": [("sub-01", "s01e01a"), ("sub-01", "s01e01b")],
+        "target_lengths": [4, 4],
+        "target_gamma": np.arange(16, dtype=float).reshape(8, 2),
+        "target_states": np.arange(8),
+        "TARGET_LABEL_LENGTHS": {"s01e01a": 4, "s01e01b": 2},
+    }
+    exec(cell_source("shared-split-target"), namespace)
+
+    decoded = namespace["decoded_by_subject"]["sub-01"]
+    assert decoded["gamma"].shape == (6, 2)
+    assert decoded["states"].tolist() == [0, 1, 2, 3, 4, 5]
+    assert decoded["part_lengths"] == [4, 2]
