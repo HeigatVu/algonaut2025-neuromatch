@@ -1,5 +1,22 @@
-algonauts_2025.competitors/
-test-orgainizer-code/
-docs
+data/
+.vscode/
+.mimocode/
+.codex/
+.agents/
+.codegraph/
 
-.venv
+docs/
+
+.venv/
+.pytest_cache/
+.ipynb_checkpoints/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+src/*.egg-info/
+
+AGENTS.md
+
+outputs/
+
